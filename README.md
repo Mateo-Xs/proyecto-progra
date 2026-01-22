@@ -5,7 +5,7 @@ Permite gestionar **productos**, **ventas (facturas)**, **inventario**, **report
 
 ---
 
-## ✨ Funcionalidades
+## ✨ *Funcionalidades*
 
 ### 1) Módulo de Productos
 - Registrar productos (nombre, precio, stock, IVA 0 / 0.12 / 0.15).
@@ -53,6 +53,9 @@ Permite gestionar **productos**, **ventas (facturas)**, **inventario**, **report
 > Si `productos.csv` y `ventas.csv` existen, el programa los carga automáticamente al iniciar.
 
 ---
+## para usar mis programa
+
+## imagenes 
 
 ## ▶️ Compilación y ejecución (Windows / Linux / macOS)
 
