@@ -101,7 +101,23 @@ float lector_float(const char *mensaje, float min, float max) {
     }
 }
 
-
+void lector_string(const char *mensaje, char *salida, size_t n) {
+    char buf[256];
+    for (;;) {
+        printf("%s", mensaje);
+        if (lector_de_todo(buf, sizeof(buf))==0) {
+        salida[0] = '\0';
+            return;
+        }
+        if (buf[0] == '\0') {
+            printf("No puede estar vacio.\n");
+            continue;
+        }
+        strncpy(salida, buf, n);
+        salida[n - 1] = '\0';
+        return;
+    }
+}
 
 
 
