@@ -1,4 +1,4 @@
-# proyecto de programación
+# Proyecto de programación
 ## Sistema de Ventas (C)
 
 Sistema de ventas por consola desarrollado en **C** para un “puesto de ventas”.  
