@@ -10,7 +10,7 @@
 #define AMARILLO  "\x1b[33m"
 #define AZUL    "\x1b[34m"
 #define CYAN    "\x1b[36m"
-#define MAXIMOPRODUCTOS 10
+#define MAXIMOPRODUCTOS 100
 typedef struct{
     int codigo;
     char nombre[50];
@@ -110,6 +110,9 @@ void cerrarCaja();
 void imprimirLineaFactura();
 void imprimirEncabezadoFactura();
 void barraCarga();
+void menuOrdenamiento();
+void vistaRapida();
+void intercambiar(Producto *a, Producto *b);
 int buscarProductoPorCodigo(int codigo);
 int main(){
     caja.abierta = false;
@@ -169,6 +172,7 @@ void menuProductos(){
         printf("1. Registrar producto\n");
         printf("2. Listar productos\n");
         printf("3. Actualizar producto\n");
+        printf("4. Centro de Ordenamiento\n");
         printf("0. Volver\n");
         printf("Seleccione una opcion: ");
         scanf(" %d", &opcion);
@@ -182,6 +186,9 @@ void menuProductos(){
             break;
             case 3:
             actualizarProductos();
+            break;
+            case 4:
+            menuOrdenamiento();
             break;
             case 0:
             break;
@@ -718,4 +725,93 @@ int buscarProductoPorCodigo(int codigo){
         }
     }
     return -1; 
+}
+// ========================================================
+//        ALGORITMO DE ORDENAMIENTO (SELECTION SORT)
+// ========================================================
+
+// Función auxiliar: Ayuda a cambiar dos productos de lugar
+void intercambiar(Producto *a, Producto *b) {
+    Producto temporal = *a; 
+    *a = *b;                
+    *b = temporal;          
+}
+
+// Función principal: Ordena usando el criterio de Selección
+// Algoritmo Selection Sort MEJORADO (Con animación y selector)
+void menuOrdenamiento() {
+    if (numProductos < 2) {
+        printf(ROJO "No hay suficientes productos para ordenar.\n" COLOR_RESET);
+        return;
+    }
+
+    int opcion;
+    printf("\n" CYAN "=== CENTRO DE ORDENAMIENTO ===" COLOR_RESET "\n");
+    printf("1. Ordenar por PRECIO (Mas caros primero)\n");
+    printf("2. Ordenar por STOCK (Los que mas tengo primero)\n");
+    printf("Seleccione criterio: ");
+    scanf("%d", &opcion);
+
+    if (opcion != 1 && opcion != 2) {
+        printf(ROJO "Opcion invalida.\n" COLOR_RESET);
+        return;
+    }
+
+    printf(AMARILLO "\nOrdenando inventario... Espere por favor...\n" COLOR_RESET);
+
+    int i, j, max_idx;
+
+    // --- INICIO DEL ALGORITMO ---
+    for (i = 0; i < numProductos - 1; i++) {
+        max_idx = i;
+        
+        // Pequeña pausa para efecto visual de "procesando"
+        Sleep(150); 
+        printf("."); // Imprime puntitos mientras piensa
+
+        for (j = i + 1; j < numProductos; j++) {
+            
+            // AQUI ESTA LA MAGIA: Decide qué comparar según lo que elegiste
+            int debeCambiar = 0;
+
+            if (opcion == 1) { 
+                // CRITERIO PRECIO: ¿Es el precio J mayor al maximo actual?
+                if (productos[j].precio > productos[max_idx].precio) debeCambiar = 1;
+            } 
+            else { 
+                // CRITERIO STOCK: ¿Es el stock J mayor al maximo actual?
+                if (productos[j].stock > productos[max_idx].stock) debeCambiar = 1;
+            }
+
+            if (debeCambiar) {
+                max_idx = j;
+            }
+        }
+
+        if (max_idx != i) {
+            intercambiar(&productos[i], &productos[max_idx]);
+        }
+    }
+    // --- FIN DEL ALGORITMO ---
+
+    system("cls"); // Limpia la pantalla para mostrar el resultado limpio
+    printf(VERDE "\n>>> ORDENAMIENTO COMPLETADO CON EXITO <<<\n" COLOR_RESET);
+    
+    if (opcion == 1) printf("Mostrando: De Mayor a Menor PRECIO\n");
+    else printf("Mostrando: De Mayor a Menor STOCK\n");
+
+    vistaRapida(); // Llama a tu nueva lista bonita
+    system("pause"); // Pausa para que el usuario pueda leer tranquilo
+}
+// Función auxiliar: Muestra solo lo importante
+void vistaRapida() {
+    printf(AZUL "\n| %-25s | %-10s | %-8s |\n", "NOMBRE", "PRECIO ($)", "STOCK");
+    printf("|---------------------------|------------|----------|\n" COLOR_RESET);
+    
+    for (int i = 0; i < numProductos; i++) {
+        // %-25s significa: deja 25 espacios para el texto
+        printf("| %-25s | $%-9.2f | %-8d |\n", 
+               productos[i].nombre, productos[i].precio, productos[i].stock);
+    }
+    printf("-----------------------------------------------------\n");
 }
