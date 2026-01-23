@@ -1,6 +1,721 @@
+//SISTEMA DE PUNTO DE VENTAS E INVENTARIO: Poli Steel
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <windows.h>
+// Códigos de colores ANSI para la consola
+#define COLOR_RESET   "\x1b[0m"
+#define ROJO     "\x1b[31m"
+#define VERDE   "\x1b[32m"
+#define AMARILLO  "\x1b[33m"
+#define AZUL    "\x1b[34m"
+#define CYAN    "\x1b[36m"
+#define MAXIMOPRODUCTOS 10
+typedef struct{
+    int codigo;
+    char nombre[50];
+    float precio;
+    int stock;
+    int stockMinimo;
+    int tipoIVA;
+} Producto;
+typedef struct{
+    bool abierta;
+    float montoInicial;
+    float totalVentas;
+    float ventasIVA0;
+    float ventasIVA12;
+}Caja;
+Producto productos[MAXIMOPRODUCTOS];
+int numProductos = 0;
+Caja caja;
+float ivaGeneral = 0.12;
+void barraCarga() {
+    printf("\nCargando Sistema Poli Steel...\n");
+    printf("[");
+    for(int i = 0; i < 40; i++) {
+        printf("="); // Imprime una barrita
+        fflush(stdout); // Forza a mostrarlo
+        Sleep(100); // Pausa de 50 milisegundos (necesita windows.h)
+    }
+    printf("] 100%%\n");
+    printf(VERDE "Sistema cargado exitosamente.\n" COLOR_RESET);
+    Sleep(1000); // Espera 1 segundo antes de seguir
+    system("cls"); // Limpia la pantalla
+}
+// --- FUNCIÓN PARA PRECARGAR DATOS (Para que no inicie vacío) ---
+void cargarDatosDePrueba(){
+    // Producto 1
+    productos[0].codigo = 101;
+    strcpy(productos[0].nombre, "Varilla de Acero 1/2");
+    productos[0].precio = 12.50;
+    productos[0].stock = 50;
+    productos[0].stockMinimo = 10;
+    productos[0].tipoIVA = 1;
 
-int main() {
-    printf("Hola mundo\n");
+    // Producto 2
+    productos[1].codigo = 102;
+    strcpy(productos[1].nombre, "Cemento Holcim 50kg");
+    productos[1].precio = 8.25;
+    productos[1].stock = 100;
+    productos[1].stockMinimo = 20;
+    productos[1].tipoIVA = 1;
+
+    // Producto 3
+    productos[2].codigo = 103;
+    strcpy(productos[2].nombre, "Clavos 2 pulgadas (Libra)");
+    productos[2].precio = 1.50;
+    productos[2].stock = 200;
+    productos[2].stockMinimo = 50;
+    productos[2].tipoIVA = 1;
+    
+    // Producto 4
+    productos[3].codigo = 104;
+    strcpy(productos[3].nombre, "Arena (Metro cubico)");
+    productos[3].precio = 45.00;
+    productos[3].stock = 15;
+    productos[3].stockMinimo = 5;
+    productos[3].tipoIVA = 0;
+
+    // Producto 5
+    productos[4].codigo = 105;
+    strcpy(productos[4].nombre, "Tuberia PVC 2m");
+    productos[4].precio = 6.75;
+    productos[4].stock = 30;
+    productos[4].stockMinimo = 5;
+    productos[4].tipoIVA = 1;
+
+    // IMPORTANTE: Actualizamos el contador para que el programa sepa que hay 5 productos
+    numProductos = 5;
+}
+//-------PROTOTIPOS DE FUNCIONES--------
+void menuPrincipal();
+void menuProductos();
+void registrarProducto();
+void listarProducto();
+void actualizarProductos();
+void menuInventario();
+void aumentarStock();
+void disminuirStock();
+void menuVentas();
+void realizarVenta();
+void menuCaja();
+void abrirCaja();
+void verEstadoCaja();
+void cambiarIVAGeneral();
+void menuReportes();
+void reporteVentasIVA();
+void reporteStockBajo();
+void cerrarCaja();
+void imprimirLineaFactura();
+void imprimirEncabezadoFactura();
+void barraCarga();
+int buscarProductoPorCodigo(int codigo);
+int main(){
+    caja.abierta = false;
+    caja.montoInicial = 0;
+    caja.totalVentas = 0;
+    caja.ventasIVA0 = 0;
+    caja.ventasIVA12 = 0;
+    barraCarga();
+    cargarDatosDePrueba();
+    
+    menuPrincipal();
     return 0;
+}
+void menuPrincipal(){
+    int opcion;
+    do{
+        printf("===================================================\n");
+        printf("                     POLI Steel                    \n");
+        printf("\n========== SISTEMA DE VENTAS E INVENTARIO =========\n");
+        printf("1. Productos\n");
+        printf("2. Inventario\n");
+        printf("3. Ventas\n");
+        printf("4. Caja\n");
+        printf("5. Reportes\n");
+        printf("0. Salir\n");
+        printf("Seleccione una opcion: ");
+        scanf("%d", &opcion);
+        switch(opcion){
+            case 1:
+               menuProductos();
+               break;
+            case 2:
+               menuInventario();
+               break;
+            case 3:
+               menuVentas();
+               break;
+            case 4:
+               menuCaja();
+               break;
+            case 5:
+               menuReportes();
+               break;
+            case 0:
+               printf("Gracias por usar Poli Steel. Saliendo del sistema....\n");
+               break;
+            default:
+               printf("Opcion invalida. Intente de nuevo.\n");
+               break;
+        }
+    } while(opcion !=0); 
+}
+void menuProductos(){
+    int opcion;
+    do{
+        printf("\n===========MENU DE PRODUCTOS===========\n");
+        printf("1. Registrar producto\n");
+        printf("2. Listar productos\n");
+        printf("3. Actualizar producto\n");
+        printf("0. Volver\n");
+        printf("Seleccione una opcion: ");
+        scanf(" %d", &opcion);
+        
+        switch(opcion){
+            case 1:
+            registrarProducto();
+            break;
+            case 2:
+            listarProducto();
+            break;
+            case 3:
+            actualizarProductos();
+            break;
+            case 0:
+            break;
+            default:
+            printf("Opcion invalida. Intente de nuevo .\n");
+            break;
+        }
+    }while(opcion != 0);
+}
+void registrarProducto(){
+   if (numProductos >= MAXIMOPRODUCTOS){
+      printf("No se pueden registrar mas productos. Arreglo lleno.\n");
+      return;
+   }
+   int codigoIngresado;
+   int indiceEncontrado;
+   printf("\n--- REGISTRAR PRODUCTO ---\n");
+   do{
+    printf("Codigo: ");
+    scanf("%d", &codigoIngresado);
+    indiceEncontrado = buscarProductoPorCodigo(codigoIngresado);
+    if(indiceEncontrado != -1) {
+        printf("El codigo %d ya existe. Ingrese otro codigo.\n", codigoIngresado);
+        }
+   }while (indiceEncontrado != -1);
+   productos[numProductos].codigo = codigoIngresado;
+   while(getchar() != '\n');
+   printf("Nombre: ");
+   scanf(" %[^\n]", productos[numProductos].nombre);
+
+   printf("Precio: ");
+   scanf(" %f", &productos[numProductos].precio);
+   
+   printf("Tipo de impuesto:\n");
+   printf("0. Exento (0%%)\n");
+   printf("1. Gravado (usa IVA general)\n");
+   printf("Opcion: ");
+   scanf("%d", &productos[numProductos].tipoIVA);
+
+   printf("Stock inicial: ");
+   scanf("%d", &productos[numProductos].stock);
+
+   printf("Stock minimo: ");
+   scanf("%d", &productos[numProductos].stockMinimo);
+   numProductos++;
+   printf("Producto registrado con exito. \n");  
+}
+void listarProducto(){
+   printf("\n---LISTA DE PRODUCTOS---\n");
+   if(numProductos == 0){
+      printf("No hay productos registrados.\n");
+      return;
+   }
+   for(int i = 0; i < numProductos; i++){
+      printf("\nProducto #%d\n", i + 1);
+      printf("Codigo: %d\n", productos[i].codigo);
+      printf("Nombre: %s\n", productos[i].nombre);
+      printf("Precio: %2f\n", productos[i].precio); 
+      printf("Stock: %d\n", productos[i].stock);
+      printf("Stock minimo: %d\n", productos[i].stockMinimo);
+      if(productos[i].tipoIVA == 0)
+      printf("Impuesto: Exento (0%%)\n");
+      else
+      printf("Impuesto: Gravado (IVA general)\n");
+   }
+   printf("\nPresione ENTER para volver...");
+   while(getchar() != '\n');
+   getchar();
+}
+void actualizarProductos(){
+   if(numProductos == 0){
+      printf("No hay productos registrados.\n");
+      return;
+   }
+   int codigoBuscado;
+   printf("\n---ACTUALIZA PRODUCTO---\n");
+   printf("Ingrese el codigo del producto a actualizar: ");
+   scanf("%d", &codigoBuscado);
+   
+   int encontrado = 0;
+   for (int i = 0; i < numProductos; i++){
+      if (productos[i].codigo == codigoBuscado){
+         encontrado = 1;
+
+         printf("Codigo: %d\n", productos[i].codigo);
+         printf("Nombre actual: %s\n", productos[i].nombre);
+         printf("Precio actual: %.2f\n", productos[i].precio);
+         printf("Stock actual: %d\n", productos[i].stock);
+         printf("Stock minimo actual: %d\n", productos[i].stockMinimo);
+         while(getchar() != '\n');
+
+         printf("\nNuevo nombre: ");
+         scanf(" %[^\n]", productos[i].nombre);
+         printf("\nNuevo Precio: ");
+         scanf(" %f", &productos[i].precio);
+         printf("Nuevo stock minimo: ");
+         scanf("%d", &productos[i].stockMinimo);
+         printf("Nuevo tipo de impuesto (0 = exento, 1 = gravado): ");
+         scanf("%d", &productos[i].tipoIVA);
+         printf("\nProducto actualizado con exito.\n");
+         break;
+      }
+   }
+   if (!encontrado){
+      printf("No existe un producto con ese codigo.\n");
+   }
+}
+void menuInventario(){
+        int opcion;
+
+    do{
+        printf("\n=========== MENU DE INVENTARIO ===========\n");
+        printf("1. Aumentar stock\n");
+        printf("2. Disminuir stock\n");
+        printf("0. Volver a menu principal\n");
+        printf("Seleccione una opcion: ");
+        scanf("%d", &opcion);
+
+        switch(opcion){
+            case 1:
+                aumentarStock();
+                break;
+
+            case 2:
+                disminuirStock();
+                break;
+
+            case 0:
+                printf("Volviendo al menu principal...\n");
+                break;
+
+            default:
+                printf("Opcion invalida. Intente de nuevo.\n");
+                break;
+        }
+
+    } while(opcion != 0);
+
+}
+void aumentarStock(){
+    if(numProductos == 0){
+        printf("\nNo hay productos registrados.\n");
+        return;
+    }
+
+    int codigo;
+    printf("\n--- AUMENTAR STOCK ---\n");
+    printf("Ingrese el codigo del producto: ");
+    scanf("%d", &codigo);
+
+    int indice = -1;
+    for(int i = 0; i < numProductos; i++){
+        if(productos[i].codigo == codigo){
+            indice = i;
+            break;
+        }
+    }
+
+    if(indice == -1){
+        printf("Producto no encontrado.\n");
+        return;
+    }
+
+    int cantidad;
+    printf("Ingrese la cantidad a agregar: ");
+    scanf("%d", &cantidad);
+
+    if(cantidad <= 0){
+        printf("Cantidad invalida.\n");
+        return;
+    }
+
+    productos[indice].stock += cantidad;
+
+    printf("Stock actualizado correctamente.\n");
+    printf("Nuevo stock: %d\n", productos[indice].stock);
+}
+void disminuirStock(){
+    if(numProductos == 0){
+        printf("\nNo hay productos registrados.\n");
+        return;
+    }
+
+    int codigo;
+    printf("\n--- DISMINUIR STOCK ---\n");
+    printf("Ingrese el codigo del producto: ");
+    scanf("%d", &codigo);
+
+    int indice = -1;
+    for(int i = 0; i < numProductos; i++){
+        if(productos[i].codigo == codigo){
+            indice = i;
+            break;
+        }
+    }
+
+    if(indice == -1){
+        printf("Producto no encontrado.\n");
+        return;
+    }
+
+    int ajuste;
+    printf("Ingrese la cantidad a disminuir: ");
+    scanf("%d", &ajuste);
+
+    if(ajuste <= 0){
+        printf("Cantidad invalida.\n");
+        return;
+    }
+
+    if(productos[indice].stock - ajuste < 0){
+        printf("No se puede disminuir por debajo de 0.\n");
+        return;
+    }
+
+    productos[indice].stock -= ajuste;
+
+    printf("Ajuste aplicado correctamente.\n");
+    printf("Nuevo stock: %d\n", productos[indice].stock);
+}
+void menuVentas(){
+    int opcion;
+    do{
+        printf(CYAN "\n=========== MENU DE VENTAS ===========\n" COLOR_RESET);
+        printf("1. Realizar venta\n");
+        printf("0. Volver\n");
+        printf("Seleccione una opcion: ");
+        scanf("%d", &opcion);
+
+        switch(opcion){
+            case 1:
+                realizarVenta();
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opcion invalida. Intente de nuevo.\n");
+        }
+
+    } while(opcion != 0);
+}
+void imprimirLineaFactura(){
+    printf("======================================================================\n");
+}
+
+void imprimirEncabezadoFactura(){
+    imprimirLineaFactura();
+    printf("                       POLI STEEL - FACTURA DE VENTA                   \n");
+    imprimirLineaFactura();
+    printf("%-6s %-18s %10s %8s %10s %10s %10s\n",
+           "COD",
+           "PRODUCTO",
+           "P.UNIT",
+           "CANT",
+           "SUBTOTAL",
+           "IVA",
+           "TOTAL");
+    imprimirLineaFactura();
+}
+void realizarVenta(){
+    if(!caja.abierta){
+        printf("\nNo se puede vender. Caja cerrada.\n");
+        return;
+    }
+
+    if(numProductos == 0){
+        printf("\nNo hay productos registrados.\n");
+        return;
+    }
+
+    float subtotalVenta = 0.0;
+    float ivaTotal = 0.0;
+
+    printf("\n\n");
+    imprimirEncabezadoFactura();
+
+    int seguir = 1;
+
+    while(seguir == 1){
+        int codigo;
+        printf("\nIngrese el codigo del producto: ");
+        scanf("%d", &codigo);
+
+        int indice = -1;
+        for(int i = 0; i < numProductos; i++){
+            if(productos[i].codigo == codigo){
+                indice = i;
+                break;
+            }
+        }
+
+        if(indice == -1){
+            printf("Producto no encontrado.\n");
+        } else {
+            printf("Nombre: %s\n", productos[indice].nombre);
+            printf("Precio unitario: %.2f\n", productos[indice].precio);
+            printf("Stock disponible: %d\n", productos[indice].stock);
+
+            int cantidad;
+            printf("Ingrese la cantidad a vender: ");
+            scanf("%d", &cantidad);
+
+            if(cantidad > productos[indice].stock || cantidad <= 0){
+                printf("Cantidad invalida.\n");
+            } else {
+                float subtotalLinea = productos[indice].precio * cantidad;
+                float ivaLinea = (productos[indice].tipoIVA == 1) ? subtotalLinea * ivaGeneral : 0.0f;
+                float totalLinea = subtotalLinea + ivaLinea;
+
+                productos[indice].stock -= cantidad;
+
+                subtotalVenta += subtotalLinea;
+                ivaTotal += ivaLinea;
+
+                if(productos[indice].tipoIVA == 0 || ivaGeneral == 0.0f){
+                    caja.ventasIVA0 += subtotalLinea;
+                } else {
+                    caja.ventasIVA12 += subtotalLinea;
+                }
+
+               
+                printf("%-6d %-18s %10.2f %8d %10.2f %10.2f %10.2f\n",
+                       productos[indice].codigo,
+                       productos[indice].nombre,
+                       productos[indice].precio,
+                       cantidad,
+                       subtotalLinea,
+                       ivaLinea,
+                       totalLinea);
+            }
+        }
+
+        printf("\nDesea agregar otro producto? (1 = si, 0 = no): ");
+        scanf("%d", &seguir);
+    }
+
+    float totalVenta = subtotalVenta + ivaTotal;
+
+    if(totalVenta == 0){
+        printf("\nVenta cancelada. No se agregaron productos.\n");
+        return;
+    }
+
+    caja.totalVentas += totalVenta;
+
+    imprimirLineaFactura();
+    printf("%50s %12.2f\n", "SUBTOTAL:", subtotalVenta);
+    printf("%50s %11.0f%% %8.2f\n", "IVA:", ivaGeneral * 100, ivaTotal);
+    printf("%50s %12.2f\n", "TOTAL A PAGAR:", totalVenta);
+    imprimirLineaFactura();
+    printf("Gracias por su compra. Vuelva pronto.\n");
+}
+void menuReportes(){
+    int opcion;
+
+    do{
+        printf("\n=========== MENU DE REPORTES ===========\n");
+        printf("1. Totales de ventas por tipo de IVA\n");
+        printf("2. Alertas de stock bajo\n");
+        printf("0. Volver\n");
+        printf("Seleccione una opcion: ");
+        scanf("%d", &opcion);
+
+        switch(opcion){
+            case 1:
+                reporteVentasIVA();
+                break;
+            case 2:
+                reporteStockBajo();
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opcion invalida. Intente de nuevo.\n");
+                break;
+        }
+
+    } while(opcion != 0);
+}
+void reporteVentasIVA(){
+    printf("\n--- REPORTE DE VENTAS POR IVA ---\n");
+
+    if(!caja.abierta && caja.totalVentas == 0){
+        printf("No hay ventas registradas en el turno.\n");
+        return;
+    }
+
+    printf("Ventas IVA 0%%:  %.2f\n", caja.ventasIVA0);
+    printf("Ventas IVA %.0f%%: %.2f\n", ivaGeneral * 100, caja.ventasIVA12);
+    printf("TOTAL ventas (con IVA): %.2f\n", caja.totalVentas);
+}
+void reporteStockBajo(){
+    printf("\n--- ALERTAS DE STOCK BAJO ---\n");
+
+    if(numProductos == 0){
+        printf("No hay productos registrados.\n");
+        return;
+    }
+
+    int hayAlertas = 0;
+
+    for(int i = 0; i < numProductos; i++){
+        if(productos[i].stock <= productos[i].stockMinimo){
+            hayAlertas = 1;
+            printf("\nALERTA: Stock bajo\n");
+            printf("Codigo: %d\n", productos[i].codigo);
+            printf("Nombre: %s\n", productos[i].nombre);
+            printf("Stock actual: %d\n", productos[i].stock);
+            printf("Stock minimo: %d\n", productos[i].stockMinimo);
+        }
+    }
+
+    if(!hayAlertas){
+        printf("No hay productos con stock bajo.\n");
+    }
+}
+void menuCaja(){
+    int opcion;
+
+    do{
+        printf("\n=========== MENU DE CAJA ===========\n");
+        printf("1. Abrir caja / Iniciar turno\n");
+        printf("2. Ver estado de caja\n");
+        printf("3. Cambiar IVA general\n");
+        printf("4. Cerrar caja / Finalizar turno\n");
+        printf("0. Volver\n");
+        printf("Seleccione una opcion: ");
+        scanf("%d", &opcion);
+
+        switch(opcion){
+            case 1:
+                abrirCaja();
+                break;
+            case 2:
+                verEstadoCaja();
+                break;
+            case 3:
+                cambiarIVAGeneral();
+                break;
+            case 4:
+                cerrarCaja();
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opcion invalida. Intente de nuevo.\n");
+                break;
+        }
+
+    } while(opcion != 0);
+}
+void abrirCaja(){
+    if(caja.abierta){
+        printf("\nLa caja ya esta abierta.\n");
+        return;
+    }
+
+    printf("\n--- APERTURA DE CAJA ---\n");
+    printf("Ingrese el monto inicial: ");
+    scanf("%f", &caja.montoInicial);
+
+    if(caja.montoInicial < 0){
+        printf("Monto invalido.\n");
+        caja.montoInicial = 0;
+    }
+
+    caja.abierta = true;
+
+    caja.totalVentas = 0;
+    caja.ventasIVA0 = 0;
+    caja.ventasIVA12 = 0;
+
+    printf("Caja abierta con exito.\n");
+}
+void verEstadoCaja(){
+    printf("\n--- ESTADO DE CAJA ---\n");
+
+    if(!caja.abierta){
+        printf("Caja cerrada.\n");
+        return;
+    }
+
+    printf("Caja abierta.\n");
+    printf("Monto inicial: %.2f\n", caja.montoInicial);
+    printf("IVA general actual: %.0f%%\n", ivaGeneral * 100);
+
+    printf("\nTotales del turno:\n");
+    printf("Ventas IVA 0%%: %.2f\n", caja.ventasIVA0);
+    printf("Ventas IVA %.0f%%: %.2f\n", ivaGeneral * 100, caja.ventasIVA12);
+    printf("Total ventas (con IVA): %.2f\n", caja.totalVentas);
+}
+void cambiarIVAGeneral(){
+    float nuevoIVA;
+
+    printf("\n--- CONFIGURAR IVA GENERAL ---\n");
+    printf("IVA actual: %.0f%%\n", ivaGeneral * 100);
+
+    printf("Ingrese el nuevo IVA general (en porcentaje): ");
+    scanf("%f", &nuevoIVA);
+
+    if(nuevoIVA < 0){
+        printf("IVA invalido.\n");
+        return;
+    }
+
+    ivaGeneral = nuevoIVA / 100.0;
+
+    printf("IVA general actualizado a %.2f%%.\n", nuevoIVA);
+}
+void cerrarCaja(){
+    if(!caja.abierta){
+        printf("\nLa caja ya esta cerrada.\n");
+        return;
+    }
+
+    printf("\n--- CIERRE DE CAJA ---\n");
+
+    float ingresosTurno = caja.totalVentas; 
+    float totalFinal = caja.montoInicial + ingresosTurno;
+
+    printf("Monto inicial: %.2f\n", caja.montoInicial);
+    printf("Ventas IVA 0%%: %.2f\n", caja.ventasIVA0);
+    printf("Ventas IVA %.0f%%: %.2f\n", ivaGeneral * 100, caja.ventasIVA12);
+    printf("Total ventas (con IVA): %.2f\n", caja.totalVentas);
+    printf("Total en caja (monto inicial + ventas): %.2f\n", totalFinal);
+
+    caja.abierta = false;
+    printf("Caja cerrada con exito.\n");
+}
+int buscarProductoPorCodigo(int codigo){
+    for(int i = 0; i < numProductos; i++){
+        if(productos[i].codigo == codigo){
+            return i; 
+        }
+    }
+    return -1; 
 }
