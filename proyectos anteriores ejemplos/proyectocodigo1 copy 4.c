@@ -3,6 +3,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <math.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #define max_ventas    1000
 #define max_productos 100
@@ -23,7 +25,7 @@ typedef struct
 PRODUCTO productos[max_productos];
 
 int total_productos=0;
-int idx=0;
+static int idx=0;
 
 
 
@@ -117,6 +119,40 @@ void lector_string(const char *mensaje, char *salida, size_t n) {
         salida[n - 1] = '\0';
         return;
     }
+}
+
+int leer_si_no(const char *mensaje) {
+    char buf[32];
+    for (;;) {
+        printf("%s", mensaje);
+        if (lector_de_todo(buf, sizeof(buf))==0) return 0;
+        if (buf[0] == 's' || buf[0] == 'S') return 1;
+        if (buf[0] == 'n' || buf[0] == 'N') return 0;
+        printf("Responde con s/n.\n");
+    }
+}
+
+
+
+int busqueda =idx;
+
+int buscarProductoPorId(int idBuscado) {
+    for (int i = 0; i < idx; i++) {
+        if (productos[i].activo == 1 && productos[i].id == idBuscado) {
+            return i;   // encontramos el producto en la posición i
+        }
+    }
+    return -1;          // no encontrado
+}
+
+int buscarProductoPornombre(const char *nombreBuscado) {
+    for (int i = 0; i < idx; i++) {
+        if (productos[i].activo == 1 &&
+            strcmp(productos[i].nombre, nombreBuscado) == 0) {
+            return i;   // encontrado
+        }
+    }
+    return -1;          // no encontrado
 }
 
 
@@ -282,24 +318,7 @@ void actualizar_producto(){
 
 }
 
-int buscarProductoPorId(int idBuscado) {
-    for (int i = 0; i < idx; i++) {
-        if (productos[i].activo == 1 && productos[i].id == idBuscado) {
-            return i;   // encontramos el producto en la posición i
-        }
-    }
-    return -1;          // no encontrado
-}
 
-int buscarProductoPornombre(const char *nombreBuscado) {
-    for (int i = 0; i < idx; i++) {
-        if (productos[i].activo == 1 &&
-            strcmp(productos[i].nombre, nombreBuscado) == 0) {
-            return i;   // encontrado
-        }
-    }
-    return -1;          // no encontrado
-}
 
 
 
