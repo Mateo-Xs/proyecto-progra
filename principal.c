@@ -129,9 +129,10 @@ int main(){
 void menuPrincipal(){
     int opcion;
     do{
-        printf("===================================================\n");
+        system("cls");
+        printf(VERDE "\n===================================================\n");
         printf("                     POLI Steel                    \n");
-        printf("\n========== SISTEMA DE VENTAS E INVENTARIO =========\n");
+        printf("\n========== SISTEMA DE VENTAS E INVENTARIO =========\n"COLOR_RESET);
         printf("1. Productos\n");
         printf("2. Inventario\n");
         printf("3. Ventas\n");
@@ -168,6 +169,7 @@ void menuPrincipal(){
 void menuProductos(){
     int opcion;
     do{
+        system("cls");
         printf("\n===========MENU DE PRODUCTOS===========\n");
         printf("1. Registrar producto\n");
         printf("2. Listar productos\n");
@@ -180,12 +182,15 @@ void menuProductos(){
         switch(opcion){
             case 1:
             registrarProducto();
+            system("pause");
             break;
             case 2:
+            system("cls");
             listarProducto();
             break;
             case 3:
             actualizarProductos();
+            system("pause");
             break;
             case 4:
             menuOrdenamiento();
@@ -194,6 +199,7 @@ void menuProductos(){
             break;
             default:
             printf("Opcion invalida. Intente de nuevo .\n");
+            system("pause");
             break;
         }
     }while(opcion != 0);
@@ -300,6 +306,7 @@ void menuInventario(){
         int opcion;
 
     do{
+        system("cls");
         printf("\n=========== MENU DE INVENTARIO ===========\n");
         printf("1. Aumentar stock\n");
         printf("2. Disminuir stock\n");
@@ -310,10 +317,12 @@ void menuInventario(){
         switch(opcion){
             case 1:
                 aumentarStock();
+                system("pause");
                 break;
 
             case 2:
                 disminuirStock();
+                system("pause");
                 break;
 
             case 0:
@@ -322,6 +331,7 @@ void menuInventario(){
 
             default:
                 printf("Opcion invalida. Intente de nuevo.\n");
+                system("pause");
                 break;
         }
 
@@ -412,6 +422,7 @@ void disminuirStock(){
 void menuVentas(){
     int opcion;
     do{
+        system("cls");
         printf(CYAN "\n=========== MENU DE VENTAS ===========\n" COLOR_RESET);
         printf("1. Realizar venta\n");
         printf("0. Volver\n");
@@ -421,11 +432,13 @@ void menuVentas(){
         switch(opcion){
             case 1:
                 realizarVenta();
+                system("pause");
                 break;
             case 0:
                 break;
             default:
                 printf("Opcion invalida. Intente de nuevo.\n");
+                system("pause");
         }
 
     } while(opcion != 0);
@@ -545,6 +558,7 @@ void menuReportes(){
     int opcion;
 
     do{
+        system("cls");
         printf("\n=========== MENU DE REPORTES ===========\n");
         printf("1. Totales de ventas por tipo de IVA\n");
         printf("2. Alertas de stock bajo\n");
@@ -554,15 +568,20 @@ void menuReportes(){
 
         switch(opcion){
             case 1:
+                system("cls");
                 reporteVentasIVA();
+                system("pause");
                 break;
             case 2:
+                system("cls");
                 reporteStockBajo();
+                system("pause");
                 break;
             case 0:
                 break;
             default:
                 printf("Opcion invalida. Intente de nuevo.\n");
+                system("pause");
                 break;
         }
 
@@ -609,6 +628,7 @@ void menuCaja(){
     int opcion;
 
     do{
+        system("cls");
         printf("\n=========== MENU DE CAJA ===========\n");
         printf("1. Abrir caja / Iniciar turno\n");
         printf("2. Ver estado de caja\n");
@@ -621,20 +641,26 @@ void menuCaja(){
         switch(opcion){
             case 1:
                 abrirCaja();
+                system("pause");
                 break;
             case 2:
+                system("cls");
                 verEstadoCaja();
+                system("pause");
                 break;
             case 3:
                 cambiarIVAGeneral();
+                system("pause");
                 break;
             case 4:
                 cerrarCaja();
+                system("pause");
                 break;
             case 0:
                 break;
             default:
                 printf("Opcion invalida. Intente de nuevo.\n");
+                system("pause");
                 break;
         }
 
@@ -738,17 +764,16 @@ void intercambiar(Producto *a, Producto *b) {
 }
 
 // Función principal: Ordena usando el criterio de Selección
-// Algoritmo Selection Sort MEJORADO (Con animación y selector)
 void menuOrdenamiento() {
     if (numProductos < 2) {
-        printf(ROJO "No hay suficientes productos para ordenar.\n" COLOR_RESET);
+        printf("No hay suficientes productos para ordenar.\n");
         return;
     }
 
     int opcion;
     printf("\n" CYAN "=== CENTRO DE ORDENAMIENTO ===" COLOR_RESET "\n");
-    printf("1. Ordenar por PRECIO (Mas caros primero)\n");
-    printf("2. Ordenar por STOCK (Los que mas tengo primero)\n");
+    printf("1. Ordenar por PRECIO\n");
+    printf("2. Ordenar por STOCK\n");
     printf("Seleccione criterio: ");
     scanf("%d", &opcion);
 
@@ -756,40 +781,32 @@ void menuOrdenamiento() {
         printf(ROJO "Opcion invalida.\n" COLOR_RESET);
         return;
     }
-
-    printf(AMARILLO "\nOrdenando inventario... Espere por favor...\n" COLOR_RESET);
-
-    int i, j, max_idx;
+    int i, j, posMayor;
 
     // --- INICIO DEL ALGORITMO ---
     for (i = 0; i < numProductos - 1; i++) {
-        max_idx = i;
-        
-        // Pequeña pausa para efecto visual de "procesando"
-        Sleep(150); 
-        printf("."); // Imprime puntitos mientras piensa
-
+        posMayor = i;
         for (j = i + 1; j < numProductos; j++) {
             
-            // AQUI ESTA LA MAGIA: Decide qué comparar según lo que elegiste
+            //Decide qué comparar según lo que elegiste
             int debeCambiar = 0;
 
             if (opcion == 1) { 
                 // CRITERIO PRECIO: ¿Es el precio J mayor al maximo actual?
-                if (productos[j].precio > productos[max_idx].precio) debeCambiar = 1;
+                if (productos[j].precio > productos[posMayor].precio) debeCambiar = 1;
             } 
             else { 
                 // CRITERIO STOCK: ¿Es el stock J mayor al maximo actual?
-                if (productos[j].stock > productos[max_idx].stock) debeCambiar = 1;
+                if (productos[j].stock > productos[posMayor].stock) debeCambiar = 1;
             }
 
             if (debeCambiar) {
-                max_idx = j;
+                posMayor = j;
             }
         }
 
-        if (max_idx != i) {
-            intercambiar(&productos[i], &productos[max_idx]);
+        if (posMayor != i) {
+            intercambiar(&productos[i], &productos[posMayor]);
         }
     }
     // --- FIN DEL ALGORITMO ---
@@ -800,13 +817,13 @@ void menuOrdenamiento() {
     if (opcion == 1) printf("Mostrando: De Mayor a Menor PRECIO\n");
     else printf("Mostrando: De Mayor a Menor STOCK\n");
 
-    vistaRapida(); // Llama a tu nueva lista bonita
+    vistaRapida(); //Llama a la funcion de Vista
     system("pause"); // Pausa para que el usuario pueda leer tranquilo
 }
 // Función auxiliar: Muestra solo lo importante
 void vistaRapida() {
-    printf(AZUL "\n| %-25s | %-10s | %-8s |\n", "NOMBRE", "PRECIO ($)", "STOCK");
-    printf("|---------------------------|------------|----------|\n" COLOR_RESET);
+    printf("\n| %-25s | %-10s | %-8s |\n", "NOMBRE", "PRECIO ($)", "STOCK");
+    printf("|---------------------------|------------|----------|\n");
     
     for (int i = 0; i < numProductos; i++) {
         // %-25s significa: deja 25 espacios para el texto
