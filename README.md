@@ -12,7 +12,7 @@
 Sistema de **punto de venta por consola** hecho en **C** para un “puesto de ventas”.  
 La idea es simple: tener un catálogo de productos, manejar inventario, abrir/cerrar caja y registrar ventas, todo desde menús.
 
-Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bimestre** se añadió lo que el profe pidió: **búsqueda + ordenamiento**, y (si aplica en tu versión) **CSV**.
+Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bimestre** se añadió lo que el profe pidió: **búsqueda + ordenamiento**, y  **CSV**.
 
 ---
 [![Compilación](https://img.shields.io/badge/Ir%20a-Compilaci%C3%B3n-blue)](#%EF%B8%8F-compilación-y-ejecución)
@@ -54,7 +54,7 @@ Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bime
 ## 🔎 Algoritmos (requisito del examen)
 
 ### Búsqueda
-- **Búsqueda lineal** por **código de producto** (para encontrar productos y validar registros).
+- **Búsqueda binaria**  (para encontrar productos y validar registros).
 
 ### Ordenamiento
 - **Selection Sort** (Centro de Ordenamiento)
