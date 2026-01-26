@@ -558,10 +558,10 @@ void realizarVenta(){
     }
 
     caja.totalVentas += totalVenta;
-    if(numVentasHistorial < MAXIMOVENTAS){
+    
         ventasHistorial[numVentasHistorial] = totalVenta;
         numVentasHistorial++;
-    }
+    
 
 
 
@@ -880,12 +880,12 @@ void vistaRapida() {
 
 RachaVentas mejorRachaVentas(int k){
 
-    RachaVentas r;
-    r.inicio = -1;
-    r.suma = 0;
+    RachaVentas racha;
+    racha.inicio = -1;
+    racha.suma = 0;
 
     if(k <= 0 || k > numVentasHistorial){
-        return r;
+        return racha;
     }
 
     float suma = 0;
@@ -905,9 +905,9 @@ RachaVentas mejorRachaVentas(int k){
         }
     }
 
-    r.inicio = mejorInicio;
-    r.suma = mejor;
-    return r;
+    racha.inicio = mejorInicio;
+    racha.suma = mejor;
+    return racha;
 }
 
 void reporteMejorRachaVentas(){
@@ -918,8 +918,8 @@ void reporteMejorRachaVentas(){
     }
 
     int k;
-    printf("\n--- REPORTE: MEJOR RACHA DE VENTAS (VENTANA DESLIZANTE) ---\n");
-    printf("Ingrese k (ventas consecutivas): ");
+    printf("\n--- REPORTE: MEJOR RACHA DE VENTAS s---\n");
+    printf("Ingrese numero de ventas consecutivas a revisar: ");
     scanf("%d", &k);
 
     RachaVentas r = mejorRachaVentas(k);
