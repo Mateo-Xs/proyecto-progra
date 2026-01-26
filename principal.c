@@ -11,6 +11,8 @@
 #define AZUL    "\x1b[34m"
 #define CYAN    "\x1b[36m"
 #define MAXIMOPRODUCTOS 100
+#define MAXIMOVENTAS 1000
+
 typedef struct{
     int codigo;
     char nombre[50];
@@ -26,10 +28,19 @@ typedef struct{
     float ventasIVA0;
     float ventasIVA12;
 }Caja;
+
+typedef struct{
+    int inicio;
+    float suma;
+} RachaVentas;
+
 Producto productos[MAXIMOPRODUCTOS];
 int numProductos = 0;
 Caja caja;
 float ivaGeneral = 0.12;
+float ventasHistorial[MAXIMOVENTAS];
+int numVentasHistorial = 0;
+
 void barraCarga() {
     printf("\nCargando Sistema Poli Steel...\n");
     printf("[");
@@ -89,6 +100,7 @@ void cargarDatosDePrueba(){
     numProductos = 5;
 }
 //-------PROTOTIPOS DE FUNCIONES--------
+
 void menuPrincipal();
 void menuProductos();
 void registrarProducto();
@@ -114,6 +126,11 @@ void menuOrdenamiento();
 void vistaRapida();
 void intercambiar(Producto *a, Producto *b);
 int buscarProductoPorCodigo(int codigo);
+int buscarProductoRec(int codigo, int low, int high);
+void reporteMejorRachaVentas();
+void reporteMejorRachaVentas();
+RachaVentas mejorRachaVentas(int k);
+
 int main(){
     caja.abierta = false;
     caja.montoInicial = 0;
@@ -485,13 +502,8 @@ void realizarVenta(){
         printf("\nIngrese el codigo del producto: ");
         scanf("%d", &codigo);
 
-        int indice = -1;
-        for(int i = 0; i < numProductos; i++){
-            if(productos[i].codigo == codigo){
-                indice = i;
-                break;
-            }
-        }
+        int indice = buscarProductoPorCodigo(codigo);
+
 
         if(indice == -1){
             printf("Producto no encontrado.\n");
@@ -546,6 +558,14 @@ void realizarVenta(){
     }
 
     caja.totalVentas += totalVenta;
+    if(numVentasHistorial < MAXIMOVENTAS){
+        ventasHistorial[numVentasHistorial] = totalVenta;
+        numVentasHistorial++;
+    }
+
+
+
+
 
     imprimirLineaFactura();
     printf("%50s %12.2f\n", "SUBTOTAL:", subtotalVenta);
@@ -562,6 +582,7 @@ void menuReportes(){
         printf("\n=========== MENU DE REPORTES ===========\n");
         printf("1. Totales de ventas por tipo de IVA\n");
         printf("2. Alertas de stock bajo\n");
+        printf("3. Mejor racha de ventas (Ventana Deslizante)\n");
         printf("0. Volver\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -577,6 +598,12 @@ void menuReportes(){
                 reporteStockBajo();
                 system("pause");
                 break;
+            case 3:
+            system("cls");
+            reporteMejorRachaVentas();
+            system("pause");
+            break;
+            
             case 0:
                 break;
             default:
@@ -848,4 +875,62 @@ void vistaRapida() {
                productos[i].nombre, productos[i].precio, productos[i].stock);
     }
     printf("-----------------------------------------------------\n");
+}
+
+
+RachaVentas mejorRachaVentas(int k){
+
+    RachaVentas r;
+    r.inicio = -1;
+    r.suma = 0;
+
+    if(k <= 0 || k > numVentasHistorial){
+        return r;
+    }
+
+    float suma = 0;
+    for(int i = 0; i < k; i++){
+        suma += ventasHistorial[i];
+    }
+
+    float mejor = suma;
+    int mejorInicio = 0;
+
+    for(int i = k; i < numVentasHistorial; i++){
+        suma = suma - ventasHistorial[i - k] + ventasHistorial[i];
+
+        if(suma > mejor){
+            mejor = suma;
+            mejorInicio = i - k + 1;
+        }
+    }
+
+    r.inicio = mejorInicio;
+    r.suma = mejor;
+    return r;
+}
+
+void reporteMejorRachaVentas(){
+
+    if(numVentasHistorial == 0){
+        printf("\nNo hay ventas registradas para analizar.\n");
+        return;
+    }
+
+    int k;
+    printf("\n--- REPORTE: MEJOR RACHA DE VENTAS (VENTANA DESLIZANTE) ---\n");
+    printf("Ingrese k (ventas consecutivas): ");
+    scanf("%d", &k);
+
+    RachaVentas r = mejorRachaVentas(k);
+
+    if(r.inicio == -1){
+        printf("k invalido. Debe estar entre 1 y %d.\n", numVentasHistorial);
+        return;
+    }
+
+    printf("\nMejor racha de %d ventas consecutivas:\n", k);
+    printf("Inicio (venta #): %d\n", r.inicio + 1);
+    printf("Fin    (venta #): %d\n", r.inicio + k);
+    printf("Total recaudado en esa racha: %.2f\n", r.suma);
 }
