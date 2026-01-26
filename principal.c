@@ -34,16 +34,16 @@ void barraCarga() {
     printf("\nCargando Sistema Poli Steel...\n");
     printf("[");
     for(int i = 0; i < 40; i++) {
-        printf("="); // Imprime una barrita
+        printf("="); 
         fflush(stdout); // Forza a mostrarlo
-        Sleep(100); // Pausa de 50 milisegundos (necesita windows.h)
+        Sleep(25); 
     }
     printf("] 100%%\n");
     printf(VERDE "Sistema cargado exitosamente.\n" COLOR_RESET);
-    Sleep(1000); // Espera 1 segundo antes de seguir
+    Sleep(500); 
     system("cls"); // Limpia la pantalla
 }
-// --- FUNCIÓN PARA PRECARGAR DATOS (Para que no inicie vacío) ---
+// DATOS PRECARGADOS
 void cargarDatosDePrueba(){
     // Producto 1
     productos[0].codigo = 101;
@@ -85,7 +85,7 @@ void cargarDatosDePrueba(){
     productos[4].stockMinimo = 5;
     productos[4].tipoIVA = 1;
 
-    // IMPORTANTE: Actualizamos el contador para que el programa sepa que hay 5 productos
+    //Actualizamos el contador para que el programa sepa que hay 5 productos
     numProductos = 5;
 }
 //-------PROTOTIPOS DE FUNCIONES--------
@@ -114,6 +114,8 @@ void menuOrdenamiento();
 void vistaRapida();
 void intercambiar(Producto *a, Producto *b);
 int buscarProductoPorCodigo(int codigo);
+void guardarInventarioCSV();
+void cargarInventarioCSV();
 int main(){
     caja.abierta = false;
     caja.montoInicial = 0;
@@ -121,9 +123,11 @@ int main(){
     caja.ventasIVA0 = 0;
     caja.ventasIVA12 = 0;
     barraCarga();
-    cargarDatosDePrueba();
-    
+    // Agg por Adrian
+    cargarInventarioCSV();
     menuPrincipal();
+    //Agg por Adrian
+    guardarInventarioCSV(); 
     return 0;
 }
 void menuPrincipal(){
@@ -241,6 +245,7 @@ void registrarProducto(){
    scanf("%d", &productos[numProductos].stockMinimo);
    numProductos++;
    printf("Producto registrado con exito. \n");  
+   guardarInventarioCSV();
 }
 void listarProducto(){
    printf("\n---LISTA DE PRODUCTOS---\n");
@@ -252,7 +257,7 @@ void listarProducto(){
       printf("\nProducto #%d\n", i + 1);
       printf("Codigo: %d\n", productos[i].codigo);
       printf("Nombre: %s\n", productos[i].nombre);
-      printf("Precio: %2f\n", productos[i].precio); 
+      printf("Precio: %.2f\n", productos[i].precio); 
       printf("Stock: %d\n", productos[i].stock);
       printf("Stock minimo: %d\n", productos[i].stockMinimo);
       if(productos[i].tipoIVA == 0)
@@ -553,6 +558,7 @@ void realizarVenta(){
     printf("%50s %12.2f\n", "TOTAL A PAGAR:", totalVenta);
     imprimirLineaFactura();
     printf("Gracias por su compra. Vuelva pronto.\n");
+    guardarInventarioCSV();
 }
 void menuReportes(){
     int opcion;
@@ -752,9 +758,9 @@ int buscarProductoPorCodigo(int codigo){
     }
     return -1; 
 }
-// ========================================================
-//        ALGORITMO DE ORDENAMIENTO (SELECTION SORT)
-// ========================================================
+// ============================================================
+//        ALGORITMO DE ORDENAMIENTO -SELECTION SORT- (MATEO)
+// ============================================================
 
 // Función auxiliar: Ayuda a cambiar dos productos de lugar
 void intercambiar(Producto *a, Producto *b) {
@@ -831,4 +837,59 @@ void vistaRapida() {
                productos[i].nombre, productos[i].precio, productos[i].stock);
     }
     printf("-----------------------------------------------------\n");
+}   
+// ========================================================
+//              FUNCIONES DE ARCHIVOS (ADRIAN)
+// ========================================================
+
+void guardarInventarioCSV() {
+    FILE *archivo = fopen("inventario.csv", "w");
+    if (archivo == NULL) {
+        printf(ROJO "Error: No se pudo crear el archivo.\n" COLOR_RESET);
+        return;
+    }
+
+    fprintf(archivo, "sep=;\n"); 
+    fprintf(archivo, "Codigo;Nombre;Precio;Stock;StockMinimo;TipoIVA\n");
+    
+    for (int i = 0; i < numProductos; i++) {
+        fprintf(archivo, "%d;%s;%.2f;%d;%d;%d\n", 
+                productos[i].codigo, 
+                productos[i].nombre, 
+                productos[i].precio, 
+                productos[i].stock, 
+                productos[i].stockMinimo, 
+                productos[i].tipoIVA);
+    }
+    
+    fclose(archivo);
+}
+
+void cargarInventarioCSV() {
+    FILE *archivo = fopen("inventario.csv", "r");
+    if (archivo == NULL) {
+        printf(AMARILLO "[!] Archivo no encontrado. Cargando datos de prueba...\n" COLOR_RESET);
+        cargarDatosDePrueba(); 
+        Sleep(1500); // Pausa para leer el aviso
+        return;
+    }
+
+    char linea[200];
+    fgets(linea, sizeof(linea), archivo); // Saltar sep=;
+    fgets(linea, sizeof(linea), archivo); // Saltar titulos
+    
+    numProductos = 0; 
+    while (fscanf(archivo, "%d;%[^;];%f;%d;%d;%d\n", 
+           &productos[numProductos].codigo, 
+           productos[numProductos].nombre, 
+           &productos[numProductos].precio, 
+           &productos[numProductos].stock, 
+           &productos[numProductos].stockMinimo, 
+           &productos[numProductos].tipoIVA) != EOF) {
+        numProductos++;
+    }
+    
+    fclose(archivo);
+    printf(VERDE "[PERFECT] Inventario cargado correctamente desde CSV.\n" COLOR_RESET);
+    Sleep(1500); // Pausa para ver el mensaje
 }
