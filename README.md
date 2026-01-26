@@ -1,5 +1,11 @@
 # 🧾 Poli Steel — Sistema de Ventas e Inventario (C)
 **autores: Mateo Guamanzara, Adrian Clonares, Andre Rosero**
+## 👥 Autores
+
+- **Andre Rosero** — GitHub: [@andrerosero22z-pixel](https://github.com/andrerosero22z-pixel)
+- **Mateo Guamanzara** — GitHub: [@Mateo-Xs](https://github.com/Mateo-Xs)
+- **Adrian Clonares** — GitHub: [@adriaan-07](https://github.com/adriaan-07)
+
 
 - *INFORMACION AUTORES*: Estudiantes de la Escuela Politecnica nacional, de la carrera de ingeneria en software y ingeneria en ciencia de datos e inteligencia artificial.
 
