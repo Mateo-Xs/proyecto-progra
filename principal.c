@@ -11,6 +11,7 @@
 #define AZUL    "\x1b[34m"
 #define CYAN    "\x1b[36m"
 #define MAXIMOPRODUCTOS 100
+#define MAXIMOVENTAS 1000
 typedef struct{
     int codigo;
     char nombre[50];
@@ -26,10 +27,19 @@ typedef struct{
     float ventasIVA0;
     float ventasIVA12;
 }Caja;
+
+typedef struct{
+    int inicio;
+    float suma;
+}RachaVentas;
+
 Producto productos[MAXIMOPRODUCTOS];
 int numProductos = 0;
 Caja caja;
 float ivaGeneral = 0.12;
+float ventasHistorial[MAXIMOVENTAS];
+int numVentasHistorial = 0;
+
 void barraCarga() {
     printf("\nCargando Sistema Poli Steel...\n");
     printf("[");
@@ -49,7 +59,7 @@ void cargarDatosDePrueba(){
     productos[0].codigo = 101;
     strcpy(productos[0].nombre, "Varilla de Acero 1/2");
     productos[0].precio = 12.50;
-    productos[0].stock = 50;
+    productos[0].stock = 40;
     productos[0].stockMinimo = 10;
     productos[0].tipoIVA = 1;
 
@@ -85,10 +95,51 @@ void cargarDatosDePrueba(){
     productos[4].stockMinimo = 5;
     productos[4].tipoIVA = 1;
 
-    //Actualizamos el contador para que el programa sepa que hay 5 productos
-    numProductos = 5;
+    // Producto 6
+    productos[5].codigo = 106;
+    strcpy(productos[5].nombre, "Martillo Mango Madera");
+    productos[5].precio = 15.00;
+    productos[5].stock = 12;
+    productos[5].stockMinimo = 3;
+    productos[5].tipoIVA = 1;
+
+    // Producto 7
+    productos[6].codigo = 107;
+    strcpy(productos[6].nombre, "Ladrillo Bloque 15cm");
+    productos[6].precio = 0.45;
+    productos[6].stock = 500;
+    productos[6].stockMinimo = 100;
+    productos[6].tipoIVA = 1;
+
+    // Producto 8
+    productos[7].codigo = 108;
+    strcpy(productos[7].nombre, "Pintura Blanca (Galon)");
+    productos[7].precio = 22.50;
+    productos[7].stock = 20;
+    productos[7].stockMinimo = 5;
+    productos[7].tipoIVA = 1;
+
+    // Producto 9
+    productos[8].codigo = 109;
+    strcpy(productos[8].nombre, "Cinta Metrica 5m");
+    productos[8].precio = 5.00;
+    productos[8].stock = 10;
+    productos[8].stockMinimo = 2;
+    productos[8].tipoIVA = 1;
+
+    // Producto 10
+    productos[9].codigo = 110;
+    strcpy(productos[9].nombre, "Casco de Seguridad");
+    productos[9].precio = 8.00;
+    productos[9].stock = 25;
+    productos[9].stockMinimo = 5;
+    productos[9].tipoIVA = 1; 
+
+    
+    numProductos = 10;
 }
 //-------PROTOTIPOS DE FUNCIONES--------
+
 void menuPrincipal();
 void menuProductos();
 void registrarProducto();
@@ -114,6 +165,10 @@ void menuOrdenamiento();
 void vistaRapida();
 void intercambiar(Producto *a, Producto *b);
 int buscarProductoPorCodigo(int codigo);
+int buscarProductoRec(int codigo, int low, int high);
+void reporteMejorRachaVentas();
+void reporteMejorRachaVentas();
+RachaVentas mejorRachaVentas(int k);
 void guardarInventarioCSV();
 void cargarInventarioCSV();
 int main(){
@@ -449,13 +504,14 @@ void menuVentas(){
     } while(opcion != 0);
 }
 void imprimirLineaFactura(){
-    printf("======================================================================\n");
+    printf("=====================================================================================\n");
 }
 
 void imprimirEncabezadoFactura(){
     imprimirLineaFactura();
-    printf("                       POLI STEEL - FACTURA DE VENTA                   \n");
+    printf("                                POLI STEEL - FACTURA DE VENTA                        \n");
     imprimirLineaFactura();
+    
     printf("%-6s %-18s %10s %8s %10s %10s %10s\n",
            "COD",
            "PRODUCTO",
@@ -490,13 +546,7 @@ void realizarVenta(){
         printf("\nIngrese el codigo del producto: ");
         scanf("%d", &codigo);
 
-        int indice = -1;
-        for(int i = 0; i < numProductos; i++){
-            if(productos[i].codigo == codigo){
-                indice = i;
-                break;
-            }
-        }
+        int indice = buscarProductoPorCodigo(codigo);
 
         if(indice == -1){
             printf("Producto no encontrado.\n");
@@ -552,6 +602,9 @@ void realizarVenta(){
 
     caja.totalVentas += totalVenta;
 
+    ventasHistorial[numVentasHistorial] = totalVenta;
+    numVentasHistorial++;
+
     imprimirLineaFactura();
     printf("%50s %12.2f\n", "SUBTOTAL:", subtotalVenta);
     printf("%50s %11.0f%% %8.2f\n", "IVA:", ivaGeneral * 100, ivaTotal);
@@ -568,6 +621,7 @@ void menuReportes(){
         printf("\n=========== MENU DE REPORTES ===========\n");
         printf("1. Totales de ventas por tipo de IVA\n");
         printf("2. Alertas de stock bajo\n");
+        printf("3. Mejor racha de ventas (Ventana Deslizante)\n");
         printf("0. Volver\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
@@ -583,6 +637,11 @@ void menuReportes(){
                 reporteStockBajo();
                 system("pause");
                 break;
+            case 3:
+                system("cls");
+                reporteMejorRachaVentas();
+                system("pause");
+                break;    
             case 0:
                 break;
             default:
@@ -750,14 +809,30 @@ void cerrarCaja(){
     caja.abierta = false;
     printf("Caja cerrada con exito.\n");
 }
-int buscarProductoPorCodigo(int codigo){
-    for(int i = 0; i < numProductos; i++){
-        if(productos[i].codigo == codigo){
-            return i; 
-        }
+// Búsqueda recursiva relizacion para no cambiar nada
+int buscarProductoRec(int codigo, int low, int high) {
+
+    if (low > high) {
+        return -1;
     }
-    return -1; 
+
+    int mid = low + (high - low) / 2;
+
+    if (productos[mid].codigo == codigo) {
+        return mid;
+    }
+
+    if (codigo < productos[mid].codigo) {
+        return buscarProductoRec(codigo, low, mid - 1);
+    } else {
+        return buscarProductoRec(codigo, mid + 1, high);
+    }
+}        
+
+int buscarProductoPorCodigo(int codigo) {
+    return buscarProductoRec(codigo, 0, numProductos - 1);
 }
+
 // ============================================================
 //        ALGORITMO DE ORDENAMIENTO -SELECTION SORT- (MATEO)
 // ============================================================
@@ -837,7 +912,61 @@ void vistaRapida() {
                productos[i].nombre, productos[i].precio, productos[i].stock);
     }
     printf("-----------------------------------------------------\n");
-}   
+}
+
+RachaVentas mejorRachaVentas(int k){
+    RachaVentas racha;
+    racha.inicio = -1;
+    racha.suma = 0;
+
+    if(k <= 0 || k > numVentasHistorial){
+        return racha;
+    }
+    float suma = 0;
+    for(int i = 0; i < k; i++){
+        suma += ventasHistorial[i];
+    }
+
+    float mejor = suma;
+    int mejorInicio = 0;
+
+    for(int i = k; i < numVentasHistorial; i++){
+        suma = suma - ventasHistorial[i - k] + ventasHistorial[i];
+
+        if(suma > mejor){
+            mejor = suma;
+            mejorInicio = i - k + 1;
+        }
+    }
+    racha.inicio = mejorInicio;
+    racha.suma = mejor;
+    return racha;
+}
+void reporteMejorRachaVentas(){
+
+    if(numVentasHistorial == 0){
+        printf("\nNo hay ventas registradas para analizar.\n");
+        return;
+    }
+
+    int k;
+    printf(CYAN "\n=========== MEJOR RACHA DE VENTAS (Ventana Deslizante) ===========\n" COLOR_RESET);
+    printf("Ingrese numero de ventas consecutivas a revisar: ");
+    scanf("%d", &k);
+
+    RachaVentas r = mejorRachaVentas(k);
+
+    if(r.inicio == -1){
+        printf("k invalido. Debe estar entre 1 y %d.\n", numVentasHistorial);
+        return;
+    }
+
+    printf("\nMejor racha de %d ventas consecutivas:\n", k);
+    printf("Inicio (venta #): %d\n", r.inicio + 1);
+    printf("Fin    (venta #): %d\n", r.inicio + k);
+    printf("Total recaudado en esa racha: %.2f\n", r.suma);
+}
+
 // ========================================================
 //              FUNCIONES DE ARCHIVOS (ADRIAN)
 // ========================================================
@@ -893,3 +1022,4 @@ void cargarInventarioCSV() {
     printf(VERDE "[PERFECT] Inventario cargado correctamente desde CSV.\n" COLOR_RESET);
     Sleep(1500); // Pausa para ver el mensaje
 }
+
