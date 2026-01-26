@@ -52,9 +52,7 @@ static int   caja_abierta = 0;
 static float caja_inicial = 0.0f;
 static float total_vendido = 0.0f;
 
-// =====================
 // Helpers: entrada segura con fgets
-// =====================
 
 static void trim_newline(char *s) {
     s[strcspn(s, "\r\n")] = '\0';

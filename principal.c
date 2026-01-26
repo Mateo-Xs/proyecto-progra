@@ -601,6 +601,14 @@ void realizarVenta(){
     }
 
     caja.totalVentas += totalVenta;
+    
+        ventasHistorial[numVentasHistorial] = totalVenta;
+        numVentasHistorial++;
+    
+
+
+
+
 
     ventasHistorial[numVentasHistorial] = totalVenta;
     numVentasHistorial++;

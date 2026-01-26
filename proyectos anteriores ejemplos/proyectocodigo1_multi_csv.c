@@ -6,8 +6,6 @@
 
 #define max_ventas    1000
 #define max_productos 100
-#define MAX_NOMBRE    50
-
 //define los atributos del producto
 typedef struct
 {
@@ -15,15 +13,20 @@ typedef struct
     char nombre[50];
     float precio;
     int stock;
-    float iva;   
+    float iva;   // 0.00, 0.12, 0.15
     int activo;
 }PRODUCTO;
-
 //definimos los 5 productos con los que iniciamos
-PRODUCTO productos[max_productos];
+PRODUCTO productos[max_productos]={
+    {110, "Leche",   0.90f,  50, 0.00f, 1},  
+    {111, "Pan",0.15f,  50, 0.00f, 1},  
+    {112, "Arroz1kg",      1.20f, 200, 0.00f, 1},  
+    {113, "Cafe200g",      3.75f,  40, 0.12f, 1},  
+    {114, "C.Huevos (16)", 2.50f,  30, 0.00f, 1}   
+};
 
 int total_productos=0;
-int idx=0;
+int idx=5;
 
 
 
@@ -53,73 +56,15 @@ float totalIva0 = 0.0, totalIva12 = 0.0, totalIva15 = 0.0,totalVentasDia=0.0;
 // funcion de regitrar producto
 int productos_registrados;
 
-//funciones  de lectura y control de bugs
-static void eliminar_saltos(char *s) {
-    s[strcspn(s, "\r\n")] = '\0';
-}
-
-static int lector_de_todo(char *buf, size_t n) {
-    if (fgets(buf, (int)n, stdin)== NULL) return 0;
-    eliminar_saltos(buf);
-    return 1;
-}
-
-static int lector_entero(const char *mensaje, int min, int max) {
-    char buf[128];
-    for (;;) {
-        printf("%s", mensaje);
-        if (lector_de_todo(buf, sizeof(buf))==0) return min;
-        char *end = NULL;
-        long v = strtol(buf, &end, 10);
-        if (end == buf || *end != '\0') {
-            printf("Entrada invalida. Intenta otra vez.\n");
-            continue;
-        }
-        if (v < min || v > max) {
-            printf("Fuera de rango (%d..%d).\n", min, max);
-            continue;
-        }
-        return (int)v;
-    }
-}
-float lector_float(const char *mensaje, float min, float max) {
-    char buf[128];
-    for (;;) {
-        printf("%s", mensaje);
-        if (lector_de_todo(buf, sizeof(buf))==0) return min;
-        char *end = NULL;
-        float v = strtof(buf, &end);
-        if (end == buf || *end != '\0') {
-            printf("Entrada invalida. Intenta otra vez.\n");
-            continue;
-        }
-        if (v < min || v > max) {
-            printf("Fuera de rango (%.2f..%.2f).\n", min, max);
-            continue;
-        }
-        return v;
-    }
-}
-
-void lector_string(const char *mensaje, char *salida, size_t n) {
-    char buf[256];
-    for (;;) {
-        printf("%s", mensaje);
-        if (lector_de_todo(buf, sizeof(buf))==0) {
-        salida[0] = '\0';
-            return;
-        }
-        if (buf[0] == '\0') {
-            printf("No puede estar vacio.\n");
-            continue;
-        }
-        strncpy(salida, buf, n);
-        salida[n - 1] = '\0';
-        return;
-    }
-}
-
-
+//funciones 
+int buscarProductoPorId(int idBuscado);
+int buscarProductoPornombre(const char *nombreBuscado);
+void mostrar_productos(int indice,float nuevoPrecio,float nuevoIva);
+void exportar_productos_csv();
+void importar_productos_csv();
+void venta_con_varios_productos();
+void Actualizar_datos_venta_con_idventa(int indice,int cantidad,int idVenta);
+void imprimir_factura(int idVenta);
 
 void registar_producto(){
     
@@ -177,21 +122,17 @@ idx += total_productos;
 
 //FUNCION DE LISTAR PROD
 void listar_productos(){
-    printf("tabla de productos(posicion,id,nombre, precio, stock,iva,activo)");
+    printf("\n\nPOS   ID     NOMBRE                    PRECIO     STOCK   IVA   ACTIVO\n");
+    printf("---------------------------------------------------------------------\n");
     for (int i = 0; i < idx; i++)
     {
-        printf("\n el producto tiene una posicion %d \n",i);
-        printf(" id %d \n ",productos[i].id);
-        printf(" nombre  %s\n",productos[i].nombre);
-        printf(" precio  %.2f  \n ",productos[i].precio);
-        printf(" stock  %d  \n ",productos[i].stock);
-        printf(" iva  %.2f  \n ",productos[i].iva);
-        printf(" activo  %d  \n ",productos[i].activo);
-        sleep(3);   
-
+        printf("%-5d %-6d %-25s %-9.2f %-7d %-5.2f %-6d\n",
+               i, productos[i].id, productos[i].nombre, productos[i].precio,
+               productos[i].stock, productos[i].iva, productos[i].activo);
     }
-
+    printf("---------------------------------------------------------------------\n");
 }
+
 
 
 void mostrar_productos(int indice,float nuevoPrecio,float nuevoIva){
@@ -282,14 +223,35 @@ void actualizar_producto(){
 
 }
 
-int buscarProductoPorId(int idBuscado) {
-    for (int i = 0; i < idx; i++) {
-        if (productos[i].activo == 1 && productos[i].id == idBuscado) {
-            return i;   // encontramos el producto en la posición i
-        }
+
+int buscarProductoRec(int codigo, int low, int high){
+
+    if(low > high){
+        return -1;
     }
-    return -1;          // no encontrado
+
+    int mid = low + (high - low) / 2;
+
+    if(productos[mid].id == codigo){
+        return mid;
+    }
+
+    if(codigo < productos[mid].id){
+        return buscarProductoRec(codigo, low, mid - 1);
+    }
+
+    return buscarProductoRec(codigo, mid + 1, high);
 }
+
+int buscarProductoPorId(int id){
+    return buscarProductoRec(id, 0, idx);
+}
+
+
+
+
+
+
 
 int buscarProductoPornombre(const char *nombreBuscado) {
     for (int i = 0; i < idx; i++) {
@@ -312,6 +274,8 @@ void menu_productos(){
         printf("(1) Registrar producto\n");
         printf("(2) Listar productos\n");
         printf("(3) Actualizar producto\n");
+        printf("(4) Exportar productos (CSV)\n");
+        printf("(5) Importar productos (CSV)\n");
         printf("(0) Volver\n");
         scanf("%d", &menu_pr);
         switch (menu_pr) {       
@@ -324,6 +288,12 @@ void menu_productos(){
             case 3:
                 actualizar_producto();
                 break;
+            case 4:
+                exportar_productos_csv();
+                break;
+            case 5:
+                importar_productos_csv();
+                break;
             case 0:
                 // salir
                 break;
@@ -334,6 +304,79 @@ void menu_productos(){
 
     } while (menu_pr != 0);
     
+}
+
+
+void exportar_productos_csv(){
+    FILE *f = fopen("productos.csv", "w");
+    if(f == NULL){
+        printf("\nno se pudo crear el archivo productos.csv\n");
+        sleep(2);
+        return;
+    }
+
+    fprintf(f, "id,nombre,precio,stock,iva,activo\n");
+    for(int i = 0; i < idx; i++){
+        fprintf(f, "%d,%s,%.2f,%d,%.2f,%d\n",
+                productos[i].id,
+                productos[i].nombre,
+                productos[i].precio,
+                productos[i].stock,
+                productos[i].iva,
+                productos[i].activo);
+    }
+
+    fclose(f);
+    printf("\nlisto, se exporto a productos.csv\n");
+    sleep(2);
+}
+
+void importar_productos_csv(){
+    FILE *f = fopen("productos.csv", "r");
+    if(f == NULL){
+        printf("\nno se encontro productos.csv (primero exporta o crea el archivo)\n");
+        sleep(2);
+        return;
+    }
+
+    char line[256];
+    int count = 0;
+
+    while(fgets(line, sizeof(line), f)){
+        // saltar cabecera si existe
+        if(count == 0 && (strstr(line, "id,") != NULL)){
+            continue;
+        }
+
+        if(count >= max_productos){
+            break;
+        }
+
+        int idTmp, stockTmp, activoTmp;
+        float precioTmp, ivaTmp;
+        char nombreTmp[50];
+
+        if(sscanf(line, "%d,%49[^,],%f,%d,%f,%d",
+                  &idTmp, nombreTmp, &precioTmp, &stockTmp, &ivaTmp, &activoTmp) == 6){
+
+            productos[count].id = idTmp;
+            strncpy(productos[count].nombre, nombreTmp, 49);
+            productos[count].nombre[49] = '\0';
+            productos[count].precio = precioTmp;
+            productos[count].stock = stockTmp;
+            productos[count].iva = ivaTmp;
+            productos[count].activo = activoTmp;
+
+            count++;
+        }
+    }
+
+    fclose(f);
+
+    idx = count;
+    total_productos = 0;   // reinicio simple
+    printf("\nlisto, se importaron %d productos desde productos.csv\n", idx);
+    sleep(2);
 }
 
 float caja_total=0.0;
@@ -392,7 +435,11 @@ void modulo_caja(){
 }
 
 
-void Actualizar_datos_venta(int indice,int cantidad){
+
+
+
+
+void Actualizar_datos_venta_con_idventa(int indice,int cantidad,int idVenta){
             char nombres[50];
             // Actualizar stock
             productos[indice].stock -= cantidad;
@@ -403,33 +450,146 @@ void Actualizar_datos_venta(int indice,int cantidad){
             strcpy(nombres,productos[indice].nombre );
             strcpy(ventas[total_ventas].nombre, nombres);
             ventas[total_ventas].cantidad   = cantidad;
-            ventas[total_ventas].idVenta = 10+total_ventas;
+            ventas[total_ventas].idVenta = idVenta;
             ventas[total_ventas].subtotal = cantidad*productos[indice].precio;
             ventas[total_ventas].iva = cantidad*productos[indice].precio*productos[indice].iva;
             ventas[total_ventas].total = ventas[total_ventas].subtotal + ventas[total_ventas].iva;
             ventas[total_ventas].tipoIva = productos[indice].iva;
-            //tiempo
-                        time_t ahora = time(NULL);          // 1) tiempo actual en segundos
-                struct tm *info = localtime(&ahora); // 2) lo paso a fecha/hora local
 
-                char fecha_hora[20];                    // 3) donde voy a guardar el texto
-                strftime(fecha_hora, 20, "%d/%m/%Y %H:%M", info);
-                strcpy(ventas[total_ventas].fechaHora, fecha_hora);// designar la fecha y hora
-            
-             printf("\n\nreporte de venta\n");
-            printf("id producto vendido %d \n",ventas[total_ventas].idProducto);
-            printf("nombre producto vendido %s\n",ventas[total_ventas].nombre);
-            printf("cantidad producto vendido %d\n",ventas[total_ventas].cantidad);
-            printf("idventa %d \n",ventas[total_ventas].idVenta);
-            printf("subtotal %.2f $\n",ventas[total_ventas].subtotal);
-            printf("iva %.2f $\n",ventas[total_ventas].iva);
-            printf("total %.2f $\n",ventas[total_ventas].total);
-            printf("fecha %s \n",ventas[total_ventas].fechaHora);
-            sleep(2);
-            
+            //tiempo
+            time_t ahora = time(NULL);
+            struct tm *info = localtime(&ahora);
+
+            char fecha_hora[20];
+            strftime(fecha_hora, 20, "%d/%m/%Y %H:%M", info);
+            strcpy(ventas[total_ventas].fechaHora, fecha_hora);
+
+            sleep(1);
             total_ventas++;
 }
 
+
+
+
+
+void venta_con_varios_productos(){
+
+    if (caja_abierta == 0) {
+        printf("La caja esta cerrada. Abra la caja para poder vender.\n");
+        sleep(2);
+        return;
+    }
+
+    int idVenta = 10 + total_ventas;   // mismo estilo que tu idventa
+    float totalGeneral = 0.0f;
+    int seguir = 1;
+
+    printf("\n\n--- venta con varios productos ---\n");
+    printf("idventa: %d\n", idVenta);
+
+    while(seguir == 1){
+
+        int id, indice, cantidad;
+
+        // mostrar productos en forma de columna
+        listar_productos();
+
+        printf("\nIngrese el ID del producto: ");
+        scanf("%d", &id);
+
+        indice = buscarProductoPorId(id);
+        if(indice == -1){
+            printf("Producto no encontrado.\n");
+        } else {
+            printf("\nProducto: %s\n", productos[indice].nombre);
+            printf("Stock actual: %d\n", productos[indice].stock);
+            printf("Cantidad a vender: ");
+            scanf("%d", &cantidad);
+
+            if(cantidad <= 0){
+                printf("Cantidad invalida.\n");
+            } else if(productos[indice].stock - cantidad < 0){
+                printf("No hay suficiente stock.\n");
+            } else {
+                Actualizar_datos_venta_con_idventa(indice, cantidad, idVenta);
+                totalGeneral += (cantidad * productos[indice].precio) + (cantidad * productos[indice].precio * productos[indice].iva);
+                printf("\nitem agregado.\n");
+            }
+        }
+
+        printf("\nAgregar otro producto? (1 para si / 0 para no): ");
+        scanf("%d", &seguir);
+    }
+
+    imprimir_factura(idVenta);
+    sleep(2);
+}
+void imprimir_factura(int idVenta){
+
+    int existe = 0;
+    char fecha[20] = "";
+
+    // buscar si existe y agarrar la fecha de la primera linea
+    for(int i = 0; i < total_ventas; i++){
+        if(ventas[i].idVenta == idVenta){
+            strcpy(fecha, ventas[i].fechaHora);
+            existe = 1;
+            break;
+        }
+    }
+
+    if(existe == 0){
+        printf("\nno existe esa venta con idventa %d\n", idVenta);
+        return;
+    }
+
+    printf("\n\n==================== FACTURA ====================\n");
+    printf("idventa: %d\n", idVenta);
+    printf("fecha:   %s\n", fecha);
+
+    printf("-------------------------------------------------\n");
+    printf("%-3s %-6s %-18s %-6s %-8s %-8s %-8s\n",
+           "N", "ID", "PRODUCTO", "CANT", "P.UNIT", "IVA", "TOTAL");
+    printf("-------------------------------------------------\n");
+
+    float subtotalGen = 0.0f;
+    float ivaGen      = 0.0f;
+    float totalGen    = 0.0f;
+
+    int n = 0;
+
+    for(int i = 0; i < total_ventas; i++){
+
+        if(ventas[i].idVenta == idVenta){
+
+            float punit = 0.0f;
+            if(ventas[i].cantidad != 0){
+                punit = ventas[i].subtotal / ventas[i].cantidad;
+            }
+
+            n++;
+
+            printf("%-3d %-6d %-18s %-6d %-8.2f %-8.2f %-8.2f\n",
+                   n,
+                   ventas[i].idProducto,
+                   ventas[i].nombre,
+                   ventas[i].cantidad,
+                   punit,
+                   ventas[i].iva,
+                   ventas[i].total);
+
+            subtotalGen += ventas[i].subtotal;
+            ivaGen      += ventas[i].iva;
+            totalGen    += ventas[i].total;
+        }
+    }
+
+    printf("-------------------------------------------------\n");
+    printf("subtotal: %.2f $\n", subtotalGen);
+    printf("iva:      %.2f $\n", ivaGen);
+    printf("total:    %.2f $\n", totalGen);
+    printf("=================================================\n");
+}
 
 
 
@@ -443,143 +603,14 @@ void modulo_ventas(void) {
         return;
     }
 
-    int venta_realizada;
 
-    do
-    {
+    
+    
         
     
 
     printf("\n=== Modulo de Ventas ===\n");
-    printf("Ingrese la forma de encontrar el producto para vender:\n");
-    printf("(1) Por posicion en la tabla\n");
-    printf("(2) Por id\n");
-    printf("(3) Por nombre\n");
-    printf("(0) Volver\n");
-    printf("Opcion: ");
-    scanf("%d", &venta_realizada);
-
-    switch (venta_realizada) {
-
-        case 1: {   // Vender por INDICE
-            int indice, cantidad;
-            
-
-            printf("Ingrese el indice del producto: ");
-            scanf("%d", &indice);
-
-            if (indice < 0 || indice >= idx) {
-                printf("Indice invalido.\n");
-                break;  // volvemos al menu de ventas
-            }
-
-            printf("\n\nID: %d\n", productos[indice].id);
-            printf("Nombre: %s\n", productos[indice].nombre);
-            printf("\n Stock actual: %d\n", productos[indice].stock);
-
-            printf("\n\nCantidad de producto a vender: \n");
-            scanf("%d", &cantidad);
-
-            if (cantidad <= 0) {
-                printf("Cantidad invalida.\n");
-                break;
-            }
-
-            if (productos[indice].stock - cantidad < 0) {
-                printf("No hay suficiente stock para esa cantidad.\n");
-                break;
-            }
-            Actualizar_datos_venta(indice,cantidad);
-
-            printf("Venta registrada correctamente.\n");
-
-            break;
-        }
-
-        case 2: {
-            printf("\n\nVenta por ID .\n");
-            int id, indice, cantidad;
-            
-
-            printf("Ingrese el id del producto: ");
-            scanf("%d", &id);
-
-            indice = buscarProductoPorId(id);
-            if (indice == -1) {
-            printf("Producto no encontrado.\n");
-            break;
-            }
-            printf("ID: %d\n", productos[indice].id);
-            printf("Nombre: %s\n", productos[indice].nombre);
-            printf("\nStock actual: %d\n\n", productos[indice].stock);
-
-            printf("\n\nCantidad de producto a vender: ");
-            scanf("%d", &cantidad);
-
-            if (cantidad <= 0) {
-                printf("Cantidad invalida.\n");
-                break;
-            }
-
-            if (productos[indice].stock - cantidad < 0) {
-                printf("No hay suficiente stock para esa cantidad.\n");
-                break;
-            }
-
-             Actualizar_datos_venta(indice,cantidad);
-
-
-            break;
-        }
-
-        case 3: {
-            printf("\n\nVenta por nombre.\n");
-            int indice, cantidad;
-            char nombre[50];
-            
-
-            printf("Ingrese el id del producto: ");
-            scanf("%49s", nombre);
-
-            indice = buscarProductoPornombre(nombre);
-            if (indice == -1) {
-            printf("Producto no encontrado.\n");
-            break;
-            }
-
-            printf("ID: %d\n", productos[indice].id);
-            printf("Nombre: %s\n", productos[indice].nombre);
-            printf("Stock actual: %d\n", productos[indice].stock);
-
-            printf("\nCantidad de producto a vender: ");
-            scanf("%d", &cantidad);
-
-            if (cantidad <= 0) {
-                printf("Cantidad invalida.\n");
-                break;
-            }
-
-            if (productos[indice].stock - cantidad < 0) {
-                printf("No hay suficiente stock para esa cantidad.\n");
-                break;
-            }
-
-             Actualizar_datos_venta(indice,cantidad);
-            
-
-            break;
-        }
-
-        case 0:
-            // volver al menu anterior
-            break;
-
-        default:
-            printf("Opcion de ventas no valida.\n");
-            break;
-    }
-     
-    } while (venta_realizada!=0);
+    venta_con_varios_productos();
 }
 
 
