@@ -15,6 +15,10 @@ La idea es simple: tener un catálogo de productos, manejar inventario, abrir/ce
 Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bimestre** se añadió lo que el profe pidió: **búsqueda + ordenamiento**, y (si aplica en tu versión) **CSV**.
 
 ---
+[![Compilación](https://img.shields.io/badge/Ir%20a-Compilaci%C3%B3n-blue)](#%EF%B8%8F-compilación-y-ejecución)
+[![Uso](https://img.shields.io/badge/Ir%20a-Uso%20r%C3%A1pido-green)](#-uso-rápido)
+[![Checklist](https://img.shields.io/badge/Ir%20a-Checklist-orange)](#-checklist-lo-que-pidió-el-profe)
+
 
 
 
