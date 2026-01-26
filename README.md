@@ -1,6 +1,7 @@
 # 🧾 Poli Steel — Sistema de Ventas e Inventario (C)
 **autores: Mateo Guamanzara, Adrian Clonares, Andre Rosero**
-*INFORMACION AUTORES*: Estudiantes de la Escuela Politecnica nacional, de la carrera de ingeneria en software y ingeneria en ciencia de datos e inteligencia artificial.
+
+- *INFORMACION AUTORES*: Estudiantes de la Escuela Politecnica nacional, de la carrera de ingeneria en software y ingeneria en ciencia de datos e inteligencia artificial.
 
 Sistema de **punto de venta por consola** hecho en **C** para un “puesto de ventas”.  
 La idea es simple: tener un catálogo de productos, manejar inventario, abrir/cerrar caja y registrar ventas, todo desde menús.
