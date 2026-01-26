@@ -16,7 +16,7 @@ Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bime
 
 ---
 [![Compilación](https://img.shields.io/badge/Ir%20a-Compilaci%C3%B3n-blue)](#%EF%B8%8F-compilación-y-ejecución)
-[![Uso](https://img.shields.io/badge/Ir%20a-Uso%20r%C3%A1pido-green)](#-uso-rápido)
+[![Uso](https://img.shields.io/badge/Ir%20a-Uso%20r%C3%A1pido-green)](#FUNIONALIDADES)
 [![Checklist](https://img.shields.io/badge/Ir%20a-Checklist-orange)](#-checklist-lo-que-pidió-el-profe)
 
 
