@@ -744,14 +744,31 @@ void cerrarCaja(){
     caja.abierta = false;
     printf("Caja cerrada con exito.\n");
 }
-int buscarProductoPorCodigo(int codigo){
-    for(int i = 0; i < numProductos; i++){
-        if(productos[i].codigo == codigo){
-            return i; 
-        }
+
+// Búsqueda recursiva relizacion para no cambiar nada
+int buscarProductoRec(int codigo, int low, int high) {
+
+    if (low > high) {
+        return -1;
     }
-    return -1; 
+
+    int mid = low + (high - low) / 2;
+
+    if (productos[mid].codigo == codigo) {
+        return mid;
+    }
+
+    if (codigo < productos[mid].codigo) {
+        return buscarProductoRec(codigo, low, mid - 1);
+    } else {
+        return buscarProductoRec(codigo, mid + 1, high);
+    }
 }
+
+int buscarProductoPorCodigo(int codigo) {
+    return buscarProductoRec(codigo, 0, numProductos - 1);
+}
+
 // ========================================================
 //        ALGORITMO DE ORDENAMIENTO (SELECTION SORT)
 // ========================================================
