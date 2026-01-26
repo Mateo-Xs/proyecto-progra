@@ -17,7 +17,6 @@ Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bime
 ![C](https://img.shields.io/badge/Language-C-00599C?logo=c&logoColor=white)
 ![License](https://img.shields.io/badge/License-Check%20LICENSE-lightgrey)
 
-[![License](https://img.shields.io/github/license/andrerosero22z-pixel/NOMBRE_DEL_REPO)](LICENSE)
 
 
 ---
