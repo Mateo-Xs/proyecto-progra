@@ -14,6 +14,12 @@ La idea es simple: tener un catálogo de productos, manejar inventario, abrir/ce
 
 Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bimestre** se añadió lo que el profe pidió: **búsqueda + ordenamiento**, y  **CSV**.
 
+![C](https://img.shields.io/badge/Language-C-00599C?logo=c&logoColor=white)
+![License](https://img.shields.io/badge/License-Check%20LICENSE-lightgrey)
+
+[![License](https://img.shields.io/github/license/andrerosero22z-pixel/NOMBRE_DEL_REPO)](LICENSE)
+
+
 ---
 [![Compilación](https://img.shields.io/badge/Ir%20a-Compilaci%C3%B3n-blue)](#%EF%B8%8F-compilación-y-ejecución)
 [![Uso](https://img.shields.io/badge/Ir%20a-Uso%20r%C3%A1pido-green)](#FUNIONALIDADES)
