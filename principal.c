@@ -1030,4 +1030,5 @@ void cargarInventarioCSV() {
     printf(VERDE "[PERFECT] Inventario cargado correctamente desde CSV.\n" COLOR_RESET);
     Sleep(1500); // Pausa para ver el mensaje
 }
+// Confirmación de versión final para el informe
 
