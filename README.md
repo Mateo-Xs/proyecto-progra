@@ -1,68 +1,67 @@
-# Proyecto de programación
-## Sistema de Ventas (C)
+# 🧾 Poli Steel — Sistema de Ventas e Inventario (C)
+**autores: Mateo Guamanzara, Adrian Clonares, Andre Rosero**
 
-Sistema de ventas por consola desarrollado en **C** para un “puesto de ventas”.  
-Permite gestionar **productos**, **ventas (facturas)**, **inventario**, **reportes** y **caja**, con guardado/carga automática de datos en archivos **CSV**.
+Sistema de **punto de venta por consola** hecho en **C** para un “puesto de ventas”.  
+La idea es simple: tener un catálogo de productos, manejar inventario, abrir/cerrar caja y registrar ventas, todo desde menús.
+
+Este repo corresponde al proyecto del **primer bimestre** y en el **segundo bimestre** se añadió lo que el profe pidió: **búsqueda + ordenamiento**, y (si aplica en tu versión) **CSV**.
 
 ---
 
-### ✨ *Funcionalidades*
 
-#### 1) Módulo de Productos
-- Registrar productos (nombre, precio, stock, IVA 0 / 0.12 / 0.15).
-- Listar productos en formato de tabla.
-- Actualizar productos:
-  - Cambiar nombre, precio, IVA.
-  - Activar / desactivar producto (activo = 1, inactivo = 0).
 
-#### 2) Módulo de Ventas (Facturas)
-- Crear una **factura** con **varios productos**.
-- Búsqueda de productos para vender por:
-  - índice, ID o nombre exacto.
-- Control de stock (no permite vender si no hay stock suficiente).
-- Calcula por ítem:
-  - subtotal, IVA, total.
-- Imprime factura con:
-  - totales generales y totales por tipo de IVA.
-- Consultar una factura por ID.
+## ✨ FUNCIONALIDADES
 
-#### 3) Módulo de Inventario
-- Ajuste de stock (positivo o negativo) por:
-  - índice, ID o nombre exacto.
-- Evita dejar stock en negativo.
+### 🧩 Productos
+- Registrar productos (código, nombre, precio, stock, stock mínimo, tipo de IVA).
+- Listar productos en tabla.
+- Editar/actualizar datos del producto (según opciones del menú).
 
-#### 4) Módulo de Reportes
-- Totales de ventas por tipo de IVA (0%, 12%, 15%).
-- Reporte de productos con stock bajo (según límite que se ingresa).
-- Historial de items vendidos (detalle de cada venta con fecha/hora).
+### 📦 Inventario
+- Aumentar stock.
+- Disminuir stock con validación (no dejar stock negativo).
 
-#### 5) Módulo de Caja
+### 🧾 Ventas
+- Solo permite vender si la **caja está abierta**.
+- Venta con **varios productos** por factura.
+- Valida: producto existente, cantidad válida y stock disponible.
+- Calcula subtotal, IVA (si aplica) y total.
+
+### 💵 Caja
 - Abrir caja con monto inicial.
-- Cerrar caja mostrando:
-  - total vendido
-  - total final (caja inicial + vendido)
-- No permite vender si la caja está cerrada.
+- Ver estado.
+- Cambiar el IVA general (por defecto 12%).
+- Cerrar caja y mostrar totales.
+
+### 📊 Reportes
+- Totales vendidos por tipo de IVA.
+- Productos con stock bajo (según stock mínimo).
 
 ---
 
-### 🧩 Archivos del proyecto
+## 🔎 Algoritmos (requisito del examen)
 
-- `ventas_epnt_v2.c` → código fuente principal.
-- `productos.csv` → se genera/actualiza automáticamente al salir.
-- `ventas.csv` → se genera/actualiza automáticamente al salir.
+### Búsqueda
+- **Búsqueda lineal** por **código de producto** (para encontrar productos y validar registros).
 
-> Si `productos.csv` y `ventas.csv` existen, el programa los carga automáticamente al iniciar.
+### Ordenamiento
+- **Selection Sort** (Centro de Ordenamiento)
+  - Ordena el catálogo (ej. por **precio** o **stock**) según la opción del menú.
 
 ---
-### para usar mis programa
 
-### imagenes 
+## 🧩 Estructura del proyecto
 
-## ▶️ Compilación y ejecución (Windows / Linux / macOS)
+- `principal.c` → archivo principal del sistema.
 
-### Opción con GCC (recomendado)
 
-**Compilar:**
+---
+
+## ▶️ Compilación y ejecución
+
+### ✅ Windows (GCC / MinGW / MSYS2)
 ```bash
-gcc ventas_epnt_v2.c -o ventas
+gcc principal.c -o poli_steel -std=c11
+./poli_steel
+
 
